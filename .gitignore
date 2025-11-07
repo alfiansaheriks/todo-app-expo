@@ -44,3 +44,5 @@ app-example
 /android
 
 .vscode
+
+./my-expo-app/*my-expo-app/
