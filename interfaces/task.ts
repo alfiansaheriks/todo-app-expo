@@ -28,3 +28,12 @@ export interface CountCard {
   title: string;
   count: number;
 }
+
+export interface TaskFormProps {
+  visible: boolean;
+  onClose: () => void;
+  onSubmit: (data: { title: string; description: string }) => void;
+  initialData?: { title: string; description: string };
+  isEditing?: boolean;
+  isLoading?: boolean;
+}

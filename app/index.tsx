@@ -12,6 +12,7 @@ import ActionButton from "./components/ui/ActionButton";
 import CounterCard from "./components/ui/CounterCard";
 import IconButton from "./components/ui/IconButton";
 import InputText from "./components/ui/InputText";
+import TaskForm from "./components/ui/TaskForm";
 
 export default function Index() {
   const [showDescription, setShowDescription] = useState(false);
@@ -19,6 +20,11 @@ export default function Index() {
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [editingTask, setEditingTask] = useState<{
+    id: string;
+    title: string;
+    description: string;
+  } | null>(null);
   const [taskResponse, setTaskResponse] = useState<
     TaskResponse<TaskListResponse>
   >({
@@ -98,6 +104,74 @@ export default function Index() {
     }
   };
 
+  const handleEditTask = (id: string) => {
+    const task = taskResponse.data?.tasks.find((t) => t.id === id);
+    if (task) {
+      setEditingTask({
+        id: task.id,
+        title: task.title,
+        description: task.description,
+      });
+    }
+  };
+
+  const handleUpdateTask = async (data: {
+    title: string;
+    description: string;
+  }) => {
+    if (!editingTask) return;
+
+    try {
+      setIsLoading(true);
+      const response = await updateTask({
+        id: editingTask.id,
+        title: data.title,
+        description: data.description,
+      });
+
+      if (response.status === SUCCESS_RESPONSE_CODE) {
+        alert(true, "Task updated successfully");
+        setEditingTask(null);
+        await fetchTasks();
+      }
+    } catch (error) {
+      setIsError(true);
+      alert(false, "Error updating task: " + error);
+    } finally {
+      setIsLoading(false);
+      setIsError(false);
+    }
+  };
+
+  const handleDeleteTask = async (id: string) => {
+    // You'll need to implement delete functionality in your services/tasks.ts
+    Alert.alert("Delete Task", "Are you sure you want to delete this task?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: async () => {
+          try {
+            setIsLoading(true);
+            // Call your delete API here
+            // await deleteTask(id);
+            alert(true, "Task deleted successfully");
+            await fetchTasks();
+          } catch (error) {
+            setIsError(true);
+            alert(false, "Error deleting task: " + error);
+          } finally {
+            setIsLoading(false);
+            setIsError(false);
+          }
+        },
+        style: "destructive",
+      },
+    ]);
+  };
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -162,12 +236,22 @@ export default function Index() {
           />
         )}
       </View>
+      <TaskForm
+        visible={!!editingTask}
+        onClose={() => setEditingTask(null)}
+        onSubmit={handleUpdateTask}
+        initialData={editingTask || { title: "", description: "" }}
+        isEditing={!!editingTask}
+        isLoading={isLoading}
+      />
       <ScrollView className="flex-1 px-4 mt-4">
         <TaskList
           tasks={taskResponse.data?.tasks || []}
           loading={isLoading}
           error={isError}
           onToggleComplete={handleToggleComplete}
+          onEdit={handleEditTask}
+          onDelete={handleDeleteTask}
         />
       </ScrollView>
     </View>

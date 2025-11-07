@@ -8,11 +8,15 @@ const TaskList = ({
   loading,
   error,
   onToggleComplete,
+  onEdit,
+  onDelete,
 }: {
   tasks: Task[];
   loading: boolean;
   error: boolean;
   onToggleComplete: (id: string, value: boolean) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }) => {
   if (loading) {
     return (
@@ -53,6 +57,8 @@ const TaskList = ({
           created_at={value.created_at}
           is_completed={value.is_completed}
           onToggleComplete={onToggleComplete}
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
       ))}
     </View>
